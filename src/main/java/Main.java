@@ -1,10 +1,11 @@
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Main {
   public static void main(String[] args){
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
     System.out.println("Logs from your program will appear here!");
 
     //  Uncomment this block to pass the first stage
@@ -18,6 +19,10 @@ public class Main {
           serverSocket.setReuseAddress(true);
           // Wait for connection from client.
           clientSocket = serverSocket.accept();
+
+          PrintWriter writer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+          writer.write("+PONG\r\n");
+          writer.close();
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
         } finally {
