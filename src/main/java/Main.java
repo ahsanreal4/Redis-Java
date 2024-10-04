@@ -17,12 +17,12 @@ public class Main {
           // ensures that we don't run into 'Address already in use' errors
           serverSocket.setReuseAddress(true);
 
-          for (int i = 0; i < 2; i++) {
-              clientSocket = serverSocket.accept();
+          clientSocket = serverSocket.accept();
 
-              clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
-              clientSocket.close();
-          }
+          clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
+          clientSocket.getInputStream().read();
+          clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
+
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
         } finally {
