@@ -63,8 +63,6 @@ public class ServerEventsHandler {
                 buffer.get(bytes);
                 String message = new String(bytes);
 
-                System.out.println("yoooo => " + message);
-
                 clientChannel.register(selector, SelectionKey.OP_WRITE);
                 return message;
             }

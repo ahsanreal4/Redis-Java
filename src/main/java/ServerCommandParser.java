@@ -3,14 +3,12 @@ import enums.RedisCommands;
 public class ServerCommandParser {
 
     public RedisCommand parseCommand(String message) {
-        System.out.println("message => " + message);
         if (message == null || message.isEmpty()) {
             System.out.println("Empty command from client");
             return null;
         }
 
         String[] messageSplit = message.split(" ");
-        System.out.println("length => " + messageSplit.length);
 
         if (messageSplit.length == 0) {
             System.out.println("Invalid Command");
