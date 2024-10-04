@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class EventLoop {
@@ -13,7 +14,7 @@ public class EventLoop {
 
     public EventLoop(ServerSocket socket) {
         this.socket = socket;
-        this.clientSockets = new ArrayList<>();
+        this.clientSockets = Collections.synchronizedList(new ArrayList<>());
     }
 
     private void writeToClient(Socket client, String message) {
