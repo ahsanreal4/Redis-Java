@@ -8,7 +8,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.Iterator;
 
 public class Server {
-    private int port;
+    private final int port;
     private ServerEventsHandler serverEventsHandler;
     private ServerSocketChannel serverChannel;
     private Selector selector;
@@ -69,9 +69,9 @@ public class Server {
             performCommandAction(command.getType(), command.getPayload(), key);
         }
         // Write key
-        else if (key.isWritable()) {
-            serverEventsHandler.writeToClient("+PONG\r\n", key);
-        }
+//        else if (key.isWritable()) {
+//            serverEventsHandler.writeToClient("+PONG\r\n", key);
+//        }
     }
 
     private void performCommandAction(RedisCommands command, String payload, SelectionKey key) {
