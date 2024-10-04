@@ -5,9 +5,12 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
 public class Server {
     private int port;
@@ -18,57 +21,74 @@ public class Server {
 
     public void start() {
         try {
-            // Create a non-blocking ServerSocketChannel
-            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-            serverSocketChannel.bind(new InetSocketAddress(port));
-            serverSocketChannel.configureBlocking(false); // Set non-blocking mode
+            // Create a Selector
+            Selector selector = Selector.open();
 
-            System.out.println("Server is listening on port 8080");
+            // Open a ServerSocketChannel
+            ServerSocketChannel serverChannel = ServerSocketChannel.open();
+            serverChannel.bind(new InetSocketAddress(port));
+            serverChannel.configureBlocking(false); // Set to non-blocking mode
+            serverChannel.register(selector, SelectionKey.OP_ACCEPT); // Register for accept events
+
+            System.out.println("Non-blocking server is listening on port 5000...");
 
             while (true) {
-                // Accept a client connection in non-blocking mode
-                SocketChannel clientChannel = serverSocketChannel.accept();
+                // Wait for events
+                selector.select();
 
-                if (clientChannel != null) {
-                    System.out.println("Client connected from: " + clientChannel.getRemoteAddress());
-                    clientChannel.configureBlocking(false);
+                // Iterate through the selected keys
+                Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
 
-                    // Read data from the client in non-blocking mode
-                    ByteBuffer buffer = ByteBuffer.allocate(1024);
+                while (keys.hasNext()) {
+                    SelectionKey key = keys.next();
+                    keys.remove();
 
-                    int bytesRead = clientChannel.read(buffer);
-                    if (bytesRead > 0) {
-                        buffer.flip();
-                        byte[] data = new byte[buffer.remaining()];
-                        buffer.get(data);
+                    if (key.isAcceptable()) {
+                        // Accept the connection
+                        SocketChannel clientChannel = serverChannel.accept();
+                        clientChannel.configureBlocking(false); // Set client to non-blocking mode
+                        clientChannel.register(selector, SelectionKey.OP_READ); // Register for read events
+                        System.out.println("Connection established with client!");
 
-                        String message = new String(data);
-                        if (message != null && message.equalsIgnoreCase("ping")) {
-                            System.out.println("here baby");
-                            writeToClient("+PONG\r\n", clientChannel);
+                    } else if (key.isReadable()) {
+                        // Read data from the client
+                        SocketChannel clientChannel = (SocketChannel) key.channel();
+                        ByteBuffer buffer = ByteBuffer.allocate(1024);
+
+                        // Read the incoming data
+                        int bytesRead = clientChannel.read(buffer);
+                        if (bytesRead == -1) {
+                            // Client has closed the connection
+                            clientChannel.close();
+                            System.out.println("Client disconnected.");
+                        } else {
+                            // Process the incoming data
+                            buffer.flip(); // Prepare buffer for reading
+                            byte[] bytes = new byte[bytesRead];
+                            buffer.get(bytes);
+                            String message = new String(bytes);
+
+                            // Optionally, write a response back to the client
+                            String response = "Server received: " + message;
+                            System.out.println(response);
+                            clientChannel.register(selector, SelectionKey.OP_WRITE); // Register for write events
                         }
+                    } else if (key.isWritable()) {
+                        // Write data to the client
+                        SocketChannel clientChannel = (SocketChannel) key.channel();
 
-                    } else if (bytesRead == -1) {
-                        // The client has closed the connection
-                        System.out.println("Client disconnected");
-                        clientChannel.close();
+                        clientChannel.write(ByteBuffer.wrap("+PONG\r\n".getBytes()));
+
+                        // After writing, remove the attachment and unregister for write
+                        key.attach(null); // Clear the attachment
+                        clientChannel.register(selector, SelectionKey.OP_READ); // Switch back to read events
                     }
                 }
-
-                // Do other work here, the server isn't blocked while waiting for data
             }
-        }
-        catch (IOException exception) {
-            System.out.println("Shutting down server...");
-            exception.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private void writeToClient(String message, SocketChannel client) {
-        try {
-            client.write(ByteBuffer.wrap(message.getBytes()));
-        } catch (IOException e) {
-            System.out.println("Connection closed with client");
-        }
-    }
 }
+
