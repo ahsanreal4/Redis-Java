@@ -33,16 +33,16 @@ public class EventLoop {
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-                    writeToClient(client, "+PONG\r\n");
+                    if (client.getInputStream().available() > 0) {
 
-//                    if (client.getInputStream().available() > 0) {
-//
-//                        String message = in.readLine();
-//
-//                        if (message != null) {
-//                            writeToClient(client, "+PONG\r\n");
-//                        }
-//                    }
+                        String message = in.readLine();
+
+                        if (message == null) return;
+
+                        if (message.equalsIgnoreCase("ping")) {
+                            writeToClient(client, "+PONG\r\n");
+                        }
+                    }
 
                 } catch (IOException e) {
                     removeClientSocket(client);
