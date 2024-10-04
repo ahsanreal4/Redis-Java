@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 
 public class Server {
     private int port;
@@ -40,7 +41,11 @@ public class Server {
                         buffer.flip();
                         byte[] data = new byte[buffer.remaining()];
                         buffer.get(data);
-                        System.out.println("Received from client: " + new String(data));
+
+                        String message = new String(data);
+                        if (message != null && message.equalsIgnoreCase("ping")) {
+                            writeToClient("+PONG\r\n", clientChannel);
+                        }
                     } else if (bytesRead == -1) {
                         // The client has closed the connection
                         System.out.println("Client disconnected");
@@ -54,6 +59,14 @@ public class Server {
         catch (IOException exception) {
             System.out.println("Shutting down server...");
             exception.printStackTrace();
+        }
+    }
+
+    private void writeToClient(String message, SocketChannel client) {
+        try {
+            client.write(ByteBuffer.wrap(message.getBytes()));
+        } catch (IOException e) {
+            System.out.println("Connection closed with client");
         }
     }
 }
