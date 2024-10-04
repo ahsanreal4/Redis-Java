@@ -64,13 +64,13 @@ public class Server {
             String message = serverEventsHandler.readFromClient(key);
             RedisCommand command = serverCommandParser.parseCommand(message);
 
+            System.out.println(command);
+
             if (command == null) return;
 
             RedisCommands redisCommand = command.getType();
             String payload = command.getPayload();
 
-            System.out.println(redisCommand.toString());
-            System.out.println(payload);
             command = null;
 
             performCommandAction(redisCommand, payload, key);
