@@ -26,8 +26,6 @@ public class ServerCommandParser {
         }
 
         String payload = messageSplit[1];
-        System.out.println(command);
-        System.out.println(payload);
         return new RedisCommand(commandType, payload);
     }
 
