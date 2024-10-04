@@ -38,7 +38,6 @@ public class EventLoop {
                         String message = in.readLine();
 
                         writeToClient(client, "+PONG\r\n");
-                        removeClientSocket(client);
                     }
 
                 } catch (IOException e) {
