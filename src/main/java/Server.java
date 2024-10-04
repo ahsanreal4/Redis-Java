@@ -44,8 +44,10 @@ public class Server {
 
                         String message = new String(data);
                         if (message != null && message.equalsIgnoreCase("ping")) {
+                            System.out.println("here baby");
                             writeToClient("+PONG\r\n", clientChannel);
                         }
+
                     } else if (bytesRead == -1) {
                         // The client has closed the connection
                         System.out.println("Client disconnected");
