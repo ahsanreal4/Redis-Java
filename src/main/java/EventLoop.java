@@ -8,19 +8,19 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class EventLoop {
     private ServerSocket socket;
-    private final BlockingQueue<Socket> queue;
+    private final BlockingQueue<Client> queue;
 
     public EventLoop(ServerSocket socket) {
         this.socket = socket;
         this.queue = new LinkedBlockingQueue<>(10);
     }
 
-    private void writeToClient(Socket client, String message) {
+    private void writeToClient(Client client, String message) {
         try {
-            client.getOutputStream().write(message.getBytes());
+            client.getSocket().getOutputStream().write(message.getBytes());
         }
         catch (IOException exception) {
-            removeClientSocket(client);
+            removeClient(client);
         }
     }
 
@@ -30,18 +30,18 @@ public class EventLoop {
 
             queue.forEach((client) -> {
                 try {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                    Socket clientSocket = client.getSocket();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-                    if (client.getInputStream().available() > 0) {
-                        System.out.println("Entered here");
-                        System.out.println("bytes => " + client.getInputStream().available());
+                    if (clientSocket.getInputStream().available() > 0) {
+                        System.out.println("Entered here => " + client.getId());
                         String message = in.readLine();
 
                         writeToClient(client, "+PONG\r\n");
                     }
 
                 } catch (IOException e) {
-                    removeClientSocket(client);
+                    removeClient(client);
                 }
             });
 
@@ -49,11 +49,11 @@ public class EventLoop {
 
     }
 
-    public void addClientSocket(Socket clientSocket) {
-        queue.add(clientSocket);
+    public void addClient(Client client) {
+        queue.add(client);
     }
 
-    public void removeClientSocket(Socket clientSocket) {
-        queue.remove(clientSocket);
+    public void removeClient(Client client) {
+        queue.remove(client);
     }
 }

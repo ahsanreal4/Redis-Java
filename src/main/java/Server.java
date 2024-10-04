@@ -28,7 +28,9 @@ public class Server {
 
             for (int i = 0; i < 2; i++) {
                 clientSocket = serverSocket.accept();
-                eventLoop.addClientSocket(clientSocket);
+
+                Client client = new Client(clientSocket);
+                eventLoop.addClient(client);
             }
 
         }
