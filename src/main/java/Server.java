@@ -82,8 +82,6 @@ public class Server {
     private void performCommandAction(RedisCommands command, String payload, SelectionKey key) {
         switch (command) {
             case ECHO:
-                System.out.println("command => " + command);
-                System.out.println("payload => " + payload);
                 serverEventsHandler.writeToClient(payload, key);
                 break;
             case PING:

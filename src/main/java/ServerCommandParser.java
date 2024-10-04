@@ -7,6 +7,7 @@ public class ServerCommandParser {
             System.out.println("Empty command from client");
             return null;
         }
+        System.out.println(message);
         System.out.println(message.length());
 
         String[] messageSplit = message.split(" ");
