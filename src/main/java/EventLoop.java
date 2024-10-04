@@ -44,7 +44,7 @@ public class EventLoop {
                         }
 
                     } catch (IOException e) {
-                        removeClientSocket(client);
+                        clientSockets.remove(client);
                     }
                 });
             }
