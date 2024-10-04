@@ -62,7 +62,7 @@ public class ServerEventsHandler {
                 byte[] bytes = new byte[bytesRead];
                 buffer.get(bytes);
                 String message = new String(bytes);
-                String response = "Received: " + message;
+                String response = "Received: " + message.trim();
                 System.out.println(response);
 
                 clientChannel.register(selector, SelectionKey.OP_WRITE);
