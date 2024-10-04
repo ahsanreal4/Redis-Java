@@ -4,30 +4,34 @@ public class ServerCommandParser {
 
     public RedisCommand parseCommand(String message) {
         if (message == null || message.isEmpty()) {
-            System.out.println("Empty message from client");
+            System.out.println("Empty command from client");
             return null;
         }
 
         String[] messageSplit = message.split(" ");
 
-        if (message.length() < 2) {
-            System.out.println("Invalid message from client");
+        if (messageSplit.length == 0) {
+            System.out.println("Invalid Command");
             return null;
         }
 
         String command = messageSplit[0];
-        String payload = messageSplit[1];
-
         RedisCommands commandType = getCommandType(command);
 
         if (commandType == null) return null;
+
+        if (messageSplit.length == 1) {
+            return new RedisCommand(commandType, "");
+        }
+
+        String payload = messageSplit[1];
 
         return new RedisCommand(commandType, payload);
     }
 
     private RedisCommands getCommandType(String command) {
         try {
-            return RedisCommands.valueOf(command);
+            return RedisCommands.fromString(command);
         }
         catch (IllegalArgumentException argumentException) {
             System.out.println("Invalid command");

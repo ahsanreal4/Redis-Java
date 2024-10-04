@@ -1,3 +1,6 @@
+import constants.RedisResponses;
+import enums.RedisCommands;
+
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -13,7 +16,6 @@ public class Server {
     public Server(int port) {
         this.port = port;
     }
-
 
     public void start() {
         try {
@@ -62,12 +64,24 @@ public class Server {
             String message = serverEventsHandler.readFromClient(key);
             RedisCommand command = serverCommandParser.parseCommand(message);
 
-            System.out.println(command.getType());
-            System.out.println(command.getPayload());
+            performCommandAction(command.getType(), command.getPayload(), key);
         }
         // Write key
         else if (key.isWritable()) {
             serverEventsHandler.writeToClient("+PONG\r\n", key);
+        }
+    }
+
+    private void performCommandAction(RedisCommands command, String payload, SelectionKey key) {
+        switch (command) {
+            case ECHO:
+                serverEventsHandler.writeToClient(payload, key);
+                break;
+            case PING:
+                serverEventsHandler.writeToClient(RedisResponses.PONG_RESPONSE, key);
+                break;
+            default:
+                System.out.println("No commands matched");
         }
     }
 }
