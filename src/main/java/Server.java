@@ -1,8 +1,12 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 public class Server {
     private int port;
@@ -12,44 +16,44 @@ public class Server {
     }
 
     public void start() {
-        ServerSocket serverSocket = null;
-        Socket clientSocket = null;
-
         try {
-            serverSocket = new ServerSocket(port);
-            // Since the tester restarts your program quite often, setting SO_REUSEADDR
-            // ensures that we don't run into 'Address already in use' errors
-            serverSocket.setReuseAddress(true);
+            // Create a non-blocking ServerSocketChannel
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.bind(new InetSocketAddress(port));
+            serverSocketChannel.configureBlocking(false); // Set non-blocking mode
 
-            EventLoop eventLoop = new EventLoop(serverSocket);
+            System.out.println("Server is listening on port 8080");
 
-            Thread eventLoopThread = new Thread(eventLoop::runLoop);
-            eventLoopThread.start();
+            while (true) {
+                // Accept a client connection in non-blocking mode
+                SocketChannel clientChannel = serverSocketChannel.accept();
 
-            for (int i = 0; i < 2; i++) {
-                clientSocket = serverSocket.accept();
+                if (clientChannel != null) {
+                    System.out.println("Client connected from: " + clientChannel.getRemoteAddress());
+                    clientChannel.configureBlocking(false);
 
-                Client client = new Client(clientSocket);
-                eventLoop.addClient(client);
-            }
+                    // Read data from the client in non-blocking mode
+                    ByteBuffer buffer = ByteBuffer.allocate(1024);
 
-        }
-
-        catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
-        }
-
-        finally {
-
-            try {
-                if (clientSocket != null) {
-                    clientSocket.close();
+                    int bytesRead = clientChannel.read(buffer);
+                    if (bytesRead > 0) {
+                        buffer.flip();
+                        byte[] data = new byte[buffer.remaining()];
+                        buffer.get(data);
+                        System.out.println("Received from client: " + new String(data));
+                    } else if (bytesRead == -1) {
+                        // The client has closed the connection
+                        System.out.println("Client disconnected");
+                        clientChannel.close();
+                    }
                 }
-            }
 
-            catch (IOException e) {
-                System.out.println("IOException: " + e.getMessage());
+                // Do other work here, the server isn't blocked while waiting for data
             }
+        }
+        catch (IOException exception) {
+            System.out.println("Shutting down server...");
+            exception.printStackTrace();
         }
     }
 }
