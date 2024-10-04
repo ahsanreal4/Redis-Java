@@ -37,7 +37,7 @@ public class EventLoop {
                         String message = in.readLine();
 
                         if (message != null) {
-                            writeToClient(client, message);
+                            writeToClient(client, "+PONG\r\n");
                         }
                     }
 
