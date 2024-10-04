@@ -8,7 +8,7 @@ import java.util.List;
 
 public class EventLoop {
     private ServerSocket socket;
-    private List<Socket> clientSockets;
+    private volatile List<Socket> clientSockets;
 
 
     public EventLoop(ServerSocket socket) {
@@ -28,24 +28,28 @@ public class EventLoop {
     public void runLoop() {
 
         while (true) {
+
             clientSockets.forEach((client) -> {
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-                    if (client.getInputStream().available() > 0) {
+                    writeToClient(client, "+PONG\r\n");
 
-                        String message = in.readLine();
-
-                        if (message != null) {
-                            writeToClient(client, "+PONG\r\n");
-                        }
-                    }
+//                    if (client.getInputStream().available() > 0) {
+//
+//                        String message = in.readLine();
+//
+//                        if (message != null) {
+//                            writeToClient(client, "+PONG\r\n");
+//                        }
+//                    }
 
                 } catch (IOException e) {
                     removeClientSocket(client);
                 }
             });
         }
+
     }
 
     public void addClientSocket(Socket clientSocket) {
