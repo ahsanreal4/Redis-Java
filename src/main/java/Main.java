@@ -17,10 +17,13 @@ public class Main {
 
             clientSocket = serverSocket.accept();
 
-            clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String line = reader.readLine();
-            clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
+//            clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
+            for (int i = 0; i < 2; i++){
+                BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                String line = reader.readLine();
+                clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
+            }
+
 
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
