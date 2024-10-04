@@ -38,13 +38,7 @@ public class EventLoop {
                         System.out.println("bytes => " + client.getInputStream().available());
                         String message = in.readLine();
 
-                        System.out.println("message => " + message);
-
-                        if (message == null) return;
-
-                        if (message.equalsIgnoreCase("ping")) {
-                            writeToClient(client, "+PONG\r\n");
-                        }
+                        writeToClient(client, "+PONG\r\n");
                     }
 
                 } catch (IOException e) {
