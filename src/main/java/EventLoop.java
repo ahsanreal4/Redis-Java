@@ -35,6 +35,7 @@ public class EventLoop {
 
                     if (clientSocket.getInputStream().available() > 0) {
                         System.out.println("Entered here => " + client.getId());
+                        String message = in.readLine();
 
                         writeToClient(client, "+PONG\r\n");
                     }
