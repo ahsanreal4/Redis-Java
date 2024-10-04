@@ -64,6 +64,8 @@ public class Server {
             String message = serverEventsHandler.readFromClient(key);
             RedisCommand command = serverCommandParser.parseCommand(message);
 
+            if (command == null) return;
+
             performCommandAction(command.getType(), command.getPayload(), key);
         }
         // Write key
