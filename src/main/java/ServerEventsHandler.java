@@ -58,7 +58,7 @@ public class ServerEventsHandler {
                 return null;
             }
             else {
-//                buffer.flip();
+                buffer.flip();
                 byte[] bytes = new byte[bytesRead];
                 buffer.get(bytes);
                 String message = new String(bytes);
