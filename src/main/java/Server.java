@@ -1,141 +1,74 @@
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
 public class Server {
     private int port;
+    private ServerEventsHandler serverEventsHandler;
+    private ServerSocketChannel serverChannel;
     private Selector selector;
 
     public Server(int port) {
         this.port = port;
     }
 
-    private ServerSocketChannel initializeServerChannel() {
-        // Open a ServerSocketChannel
-        try {
-            ServerSocketChannel serverChannel = ServerSocketChannel.open();
-            serverChannel.bind(new InetSocketAddress(port));
-            serverChannel.configureBlocking(false); // Set to non-blocking mode
-            serverChannel.register(selector, SelectionKey.OP_ACCEPT); // Register for accept events
-
-            return serverChannel;
-        } catch (IOException e) {
-            System.out.println("Error in initializing server socket channel");
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public void start() {
         try {
             // Create a Selector
             selector = Selector.open();
-
-            ServerSocketChannel serverChannel = initializeServerChannel();
+            serverEventsHandler = new ServerEventsHandler(selector);
+            serverChannel = serverEventsHandler.initializeServerChannel(port);
 
             if (serverChannel == null) {
                 System.out.println("Shutting down...");
                 return;
             }
 
-            while (true) {
-                // Wait for events
-                selector.select();
-
-                // Iterate through the selected keys
-                Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
-
-                while (keys.hasNext()) {
-                    SelectionKey key = keys.next();
-                    keys.remove();
-
-                    // Accept connection key
-                    if (key.isAcceptable()) {
-                        acceptClientConnection(serverChannel);
-                    }
-                    // Read key
-                    else if (key.isReadable()) {
-                        String message = readFromClient(key);
-                    }
-                    // Write key
-                    else if (key.isWritable()) {
-                        writeToClient("+PONG\r\n", key);
-                    }
-                }
-            }
+            startEventLoop();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void acceptClientConnection(ServerSocketChannel serverChannel) {
-        try {
-            // Accept the connection
-            SocketChannel clientChannel = serverChannel.accept();
-            clientChannel.configureBlocking(false); // Set client to non-blocking mode
-            clientChannel.register(selector, SelectionKey.OP_READ); // Register for read events
-        }
-        catch (IOException exception) {
-            System.out.println("Error in accepting connection");
-            exception.printStackTrace();
+    private void startEventLoop() throws IOException {
+        ServerCommandParser serverCommandParser = new ServerCommandParser();
+
+        while (true) {
+            // Wait for events
+            selector.select();
+
+            // Iterate through the selected keys
+            Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
+
+            while (keys.hasNext()) {
+                SelectionKey key = keys.next();
+                keys.remove();
+
+                performAppropriateTask(key, serverCommandParser);
+            }
         }
     }
 
-    private String readFromClient(SelectionKey key)  {
-        try {
-            // Read data from the client
-            SocketChannel clientChannel = (SocketChannel) key.channel();
-            ByteBuffer buffer = ByteBuffer.allocate(1024);
-
-            // Read the incoming data
-            int bytesRead = clientChannel.read(buffer);
-            if (bytesRead == -1) {
-                // Client has closed the connection
-                clientChannel.close();
-                System.out.println("Client disconnected");
-                return null;
-            }
-            else {
-                buffer.flip();
-                byte[] bytes = new byte[bytesRead];
-                buffer.get(bytes);
-                String message = new String(bytes);
-
-                String response = "Server received: " + message;
-                System.out.println(response);
-                clientChannel.register(selector, SelectionKey.OP_WRITE); // Register for write events
-
-                return message;
-            }
+    private void performAppropriateTask(SelectionKey key, ServerCommandParser serverCommandParser){
+        // Accept connection key
+        if (key.isAcceptable()) {
+            serverEventsHandler.acceptClientConnection(serverChannel);
         }
-        catch (IOException exception) {
-            exception.printStackTrace();
-            return null;
+        // Read key
+        else if (key.isReadable()) {
+            String message = serverEventsHandler.readFromClient(key);
+            RedisCommand command = serverCommandParser.parseCommand(message);
+
+            System.out.println(command.getType());
+            System.out.println(command.getPayload());
+        }
+        // Write key
+        else if (key.isWritable()) {
+            serverEventsHandler.writeToClient("+PONG\r\n", key);
         }
     }
-
-    private void writeToClient(String message, SelectionKey key) {
-        SocketChannel clientChannel = (SocketChannel) key.channel();
-
-        try {
-            clientChannel.write(ByteBuffer.wrap(message.getBytes()));
-            clientChannel.register(selector, SelectionKey.OP_READ); // Switch back to read events
-        } catch (IOException exception) {
-            try {
-                System.out.println("Error while writing to client. Closing connection.");
-                clientChannel.close();
-            }
-            catch (IOException exception1) {
-                System.out.println("Error while closing client");
-            }
-        }
-
-    }
-
 }
 
