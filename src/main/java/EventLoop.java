@@ -8,7 +8,7 @@ import java.util.List;
 
 public class EventLoop {
     private ServerSocket socket;
-    private volatile List<Socket> clientSockets;
+    private List<Socket> clientSockets;
 
 
     public EventLoop(ServerSocket socket) {
