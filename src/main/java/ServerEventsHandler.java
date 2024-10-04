@@ -63,7 +63,7 @@ public class ServerEventsHandler {
                 buffer.get(bytes);
                 String message = new String(bytes);
 
-                clientChannel.register(selector, SelectionKey.OP_WRITE);
+                clientChannel.register(selector, SelectionKey.OP_READ);
                 return message;
             }
         }
