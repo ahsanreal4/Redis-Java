@@ -63,10 +63,7 @@ public class ServerEventsHandler {
                 buffer.get(bytes);
                 String message = new String(bytes);
 
-                String response = "Server received: " + message;
-                System.out.println(response);
-                clientChannel.register(selector, SelectionKey.OP_WRITE); // Register for write events
-
+                clientChannel.register(selector, SelectionKey.OP_WRITE);
                 return message;
             }
         }
