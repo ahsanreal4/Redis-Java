@@ -47,7 +47,7 @@ public class ServerEventsHandler {
         try {
             // Read data from the client
             SocketChannel clientChannel = (SocketChannel) key.channel();
-            ByteBuffer buffer = ByteBuffer.allocate(2048);
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
 
             // Read the incoming data
             int bytesRead = clientChannel.read(buffer);
@@ -62,6 +62,8 @@ public class ServerEventsHandler {
                 byte[] bytes = new byte[bytesRead];
                 buffer.get(bytes);
                 String message = new String(bytes);
+                String response = "Received: " + message;
+                System.out.println(response);
 
                 clientChannel.register(selector, SelectionKey.OP_WRITE);
                 return message;
