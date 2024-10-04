@@ -5,6 +5,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 
 public class ServerEventsHandler {
     private Selector selector;
@@ -61,9 +62,17 @@ public class ServerEventsHandler {
                 buffer.flip();
                 byte[] bytes = new byte[bytesRead];
                 buffer.get(bytes);
-                String message = new String(bytes);
-                String response = "Received: " + message.trim();
-                System.out.println(response);
+
+                // Inspect the raw byte data
+                System.out.print("Received bytes: ");
+                for (byte b : bytes) {
+                    System.out.print(String.format("%02X ", b));
+                }
+                System.out.println();
+
+
+                String message = new String(bytes, StandardCharsets.UTF_8);
+                String response = "Received: " + message;
 
                 clientChannel.register(selector, SelectionKey.OP_WRITE);
                 return message;
