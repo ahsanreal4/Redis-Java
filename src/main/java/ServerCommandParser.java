@@ -3,6 +3,7 @@ import enums.RedisCommands;
 public class ServerCommandParser {
 
     public RedisCommand parseCommand(String message) {
+        System.out.println(message);
         if (message == null || message.isEmpty()) {
             System.out.println("Empty command from client");
             return null;
@@ -25,7 +26,8 @@ public class ServerCommandParser {
         }
 
         String payload = messageSplit[1];
-
+        System.out.println(command);
+        System.out.println(payload);
         return new RedisCommand(commandType, payload);
     }
 
