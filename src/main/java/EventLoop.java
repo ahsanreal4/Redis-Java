@@ -3,18 +3,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class EventLoop {
     private ServerSocket socket;
-    private final List<Socket> clientSockets;
+    private final BlockingQueue<Socket> queue;
+
 
 
     public EventLoop(ServerSocket socket) {
         this.socket = socket;
-        this.clientSockets = Collections.synchronizedList(new ArrayList<>());
+        this.queue = new LinkedBlockingQueue<>(10);
     }
 
     private void writeToClient(Socket client, String message) {
@@ -30,39 +30,32 @@ public class EventLoop {
 
         while (true) {
 
-            synchronized (clientSockets) {
-                clientSockets.forEach((client) -> {
-                    try {
-                        BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            queue.forEach((client) -> {
+                try {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-                        if (client.getInputStream().available() > 0) {
-                            System.out.println("Entered here");
-                            System.out.println("bytes => " + client.getInputStream().available());
-                            String message = in.readLine();
+                    if (client.getInputStream().available() > 0) {
+                        System.out.println("Entered here");
+                        System.out.println("bytes => " + client.getInputStream().available());
+                        String message = in.readLine();
 
-                            writeToClient(client, "+PONG\r\n");
-                        }
-
-                    } catch (IOException e) {
-                        clientSockets.remove(client);
+                        writeToClient(client, "+PONG\r\n");
                     }
-                });
-            }
 
+                } catch (IOException e) {
+                    removeClientSocket(client);
+                }
+            });
 
         }
 
     }
 
     public void addClientSocket(Socket clientSocket) {
-        synchronized (clientSockets) {
-            clientSockets.add(clientSocket);
-        }
+        queue.add(clientSocket);
     }
 
     public void removeClientSocket(Socket clientSocket) {
-        synchronized (clientSockets) {
-            clientSockets.remove(clientSocket);
-        }
+        queue.remove(clientSocket);
     }
 }
