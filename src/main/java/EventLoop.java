@@ -10,8 +10,6 @@ public class EventLoop {
     private ServerSocket socket;
     private final BlockingQueue<Socket> queue;
 
-
-
     public EventLoop(ServerSocket socket) {
         this.socket = socket;
         this.queue = new LinkedBlockingQueue<>(10);
