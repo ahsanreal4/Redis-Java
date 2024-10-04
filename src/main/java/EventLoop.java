@@ -33,8 +33,8 @@ public class EventLoop {
                     Socket clientSocket = client.getSocket();
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
+                    System.out.println("Queue Size => " + queue.size());
                     if (clientSocket.getInputStream().available() > 0) {
-                        System.out.println("Queue Size => " + queue.size());
                         System.out.println("Entered here => " + client.getId());
                         String message = in.readLine();
 
