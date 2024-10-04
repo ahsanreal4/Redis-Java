@@ -1,4 +1,7 @@
+import constants.RedisParseSymbols;
 import enums.RedisCommands;
+
+import java.util.Arrays;
 
 public class ServerCommandParser {
 
@@ -8,24 +11,18 @@ public class ServerCommandParser {
             return null;
         }
 
-        String[] messageSplit = message.split(" ");
+        String parseSymbol = "" + message.charAt(0);
 
-        if (messageSplit.length == 0) {
-            System.out.println("Invalid Command");
+        // If it is a valid symbol
+        if (Arrays.stream(RedisParseSymbols.REDIS_PARSE_SYMBOLS_ARRAY).findFirst().isPresent()) {
+            System.out.println("Valid symbol => " + parseSymbol);
+
             return null;
         }
-
-        String command = messageSplit[0];
-        RedisCommands commandType = getCommandType(command);
-
-        if (commandType == null) return null;
-
-        if (messageSplit.length == 1) {
-            return new RedisCommand(commandType, "");
+        else {
+            System.out.println("Invalid Parse Symbol");
+            return null;
         }
-
-        String payload = messageSplit[1];
-        return new RedisCommand(commandType, payload);
     }
 
     private RedisCommands getCommandType(String command) {

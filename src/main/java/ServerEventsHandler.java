@@ -63,16 +63,7 @@ public class ServerEventsHandler {
                 byte[] bytes = new byte[bytesRead];
                 buffer.get(bytes);
 
-                // Inspect the raw byte data
-                System.out.print("Received bytes: ");
-                for (byte b : bytes) {
-                    System.out.print(String.format("%02X ", b));
-                }
-                System.out.println();
-
-
                 String message = new String(bytes, StandardCharsets.UTF_8);
-                String response = "Received: " + message;
 
                 clientChannel.register(selector, SelectionKey.OP_WRITE);
                 return message;
