@@ -66,7 +66,12 @@ public class Server {
 
             if (command == null) return;
 
-            performCommandAction(command.getType(), command.getPayload(), key);
+            RedisCommands redisCommand = command.getType();
+            String payload = command.getPayload();
+
+            command = null;
+
+            performCommandAction(redisCommand, payload, key);
         }
         // Write key
 //        else if (key.isWritable()) {
@@ -77,6 +82,8 @@ public class Server {
     private void performCommandAction(RedisCommands command, String payload, SelectionKey key) {
         switch (command) {
             case ECHO:
+                System.out.println("command => " + command);
+                System.out.println("payload => " + payload);
                 serverEventsHandler.writeToClient(payload, key);
                 break;
             case PING:
