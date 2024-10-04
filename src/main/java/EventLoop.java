@@ -33,10 +33,9 @@ public class EventLoop {
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-                    System.out.println("bytes => " + client.getInputStream().available());
-
                     if (client.getInputStream().available() > 0) {
-
+                        System.out.println("Entered here");
+                        System.out.println("bytes => " + client.getInputStream().available());
                         String message = in.readLine();
 
                         if (message == null) return;
