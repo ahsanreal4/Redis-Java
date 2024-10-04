@@ -9,7 +9,7 @@ import java.util.List;
 
 public class EventLoop {
     private ServerSocket socket;
-    private volatile List<Socket> clientSockets;
+    private final List<Socket> clientSockets;
 
 
     public EventLoop(ServerSocket socket) {
@@ -30,31 +30,39 @@ public class EventLoop {
 
         while (true) {
 
-            clientSockets.forEach((client) -> {
-                try {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            synchronized (clientSockets) {
+                clientSockets.forEach((client) -> {
+                    try {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-                    if (client.getInputStream().available() > 0) {
-                        System.out.println("Entered here");
-                        System.out.println("bytes => " + client.getInputStream().available());
-                        String message = in.readLine();
+                        if (client.getInputStream().available() > 0) {
+                            System.out.println("Entered here");
+                            System.out.println("bytes => " + client.getInputStream().available());
+                            String message = in.readLine();
 
-                        writeToClient(client, "+PONG\r\n");
+                            writeToClient(client, "+PONG\r\n");
+                        }
+
+                    } catch (IOException e) {
+                        removeClientSocket(client);
                     }
+                });
+            }
 
-                } catch (IOException e) {
-                    removeClientSocket(client);
-                }
-            });
+
         }
 
     }
 
     public void addClientSocket(Socket clientSocket) {
-        clientSockets.add(clientSocket);
+        synchronized (clientSockets) {
+            clientSockets.add(clientSocket);
+        }
     }
 
     public void removeClientSocket(Socket clientSocket) {
-        clientSockets.remove(clientSocket);
+        synchronized (clientSockets) {
+            clientSockets.remove(clientSocket);
+        }
     }
 }
