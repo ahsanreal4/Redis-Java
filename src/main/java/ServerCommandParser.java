@@ -10,6 +10,7 @@ public class ServerCommandParser {
         }
 
         String[] messageSplit = message.split(" ");
+        System.out.println("length => " + messageSplit.length);
 
         if (messageSplit.length == 0) {
             System.out.println("Invalid Command");
