@@ -69,14 +69,16 @@ public class Server {
             RedisCommands redisCommand = command.getType();
             String payload = command.getPayload();
 
+            System.out.println(redisCommand.toString());
+            System.out.println(payload);
             command = null;
 
             performCommandAction(redisCommand, payload, key);
         }
         // Write key
-//        else if (key.isWritable()) {
-//            serverEventsHandler.writeToClient("+PONG\r\n", key);
-//        }
+        else if (key.isWritable()) {
+            serverEventsHandler.writeToClient("+PONG\r\n", key);
+        }
     }
 
     private void performCommandAction(RedisCommands command, String payload, SelectionKey key) {
