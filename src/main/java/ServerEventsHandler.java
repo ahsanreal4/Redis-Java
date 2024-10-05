@@ -65,7 +65,7 @@ public class ServerEventsHandler {
 
                 String message = new String(bytes, StandardCharsets.UTF_8);
 
-                clientChannel.register(selector, SelectionKey.OP_WRITE);
+                clientChannel.register(selector, SelectionKey.OP_READ);
                 return message;
             }
         }
