@@ -25,7 +25,11 @@ public class ServerCommandParser {
             if (command == null) {
                 System.out.println("Invalid message. The parser failed to parsed the message.");
                 System.out.println("Message => " + message);
+                return null;
             }
+
+            // This is done so command can match with the enum commands
+            command.setCommand(command.getCommand().toUpperCase());
 
             parser = null;
 

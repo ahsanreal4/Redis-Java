@@ -21,7 +21,7 @@ public class SimpleStringParser extends Parser {
         if (splitString.length != 1) return null;
 
         String commandString = splitString[0];
-        String command = commandString.substring(1).toUpperCase();
+        String command = commandString.substring(1);
 
         return new Command(command, "");
     }
