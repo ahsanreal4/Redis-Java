@@ -1,5 +1,7 @@
 import constants.RedisResponses;
 import enums.RedisCommands;
+import parser.Command;
+import parser.ServerCommandParser;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -62,11 +64,11 @@ public class Server {
         // Read key
         else if (key.isReadable()) {
             String message = serverEventsHandler.readFromClient(key);
-            RedisCommand command = serverCommandParser.parseCommand(message);
+            Command command = serverCommandParser.parseCommand(message);
 
             if (command == null) return;
 
-            RedisCommands redisCommand = command.getType();
+            RedisCommands redisCommand = RedisCommands.valueOf(command.getCommand());
             String payload = command.getPayload();
 
             command = null;
