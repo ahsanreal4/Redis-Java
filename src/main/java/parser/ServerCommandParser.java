@@ -1,6 +1,7 @@
 package parser;
 
 import constants.RedisParseSymbols;
+import enums.RedisCommands;
 import parser.aggregate.ArrayParser;
 import parser.simple.SimpleStringParser;
 
@@ -21,6 +22,7 @@ public class ServerCommandParser {
             Parser parser = getParser(parseSymbol);
 
             Command command = parser.parse(message);
+            parser = null;
 
             if (command == null) {
                 System.out.println("Invalid message. The parser failed to parsed the message.");
@@ -31,7 +33,14 @@ public class ServerCommandParser {
             // This is done so command can match with the enum commands
             command.setCommand(command.getCommand().toUpperCase());
 
-            parser = null;
+            // Validate that the command passed in the message is a valid Redis Command
+            try {
+                RedisCommands.valueOf(command.getCommand());
+            }
+            catch (IllegalArgumentException exception) {
+                System.out.println("Invalid Command");
+                return null;
+            }
 
             return command;
         }
