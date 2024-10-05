@@ -1,7 +1,6 @@
-import constants.RedisResponses;
-import enums.RedisCommands;
 import parser.Command;
 import parser.ServerCommandParser;
+import responder.ServerCommandResponder;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -39,6 +38,7 @@ public class Server {
 
     private void startEventLoop() throws IOException {
         ServerCommandParser serverCommandParser = new ServerCommandParser();
+        ServerCommandResponder serverCommandResponder = new ServerCommandResponder();
 
         while (true) {
             // Wait for events
@@ -51,12 +51,13 @@ public class Server {
                 SelectionKey key = keys.next();
                 keys.remove();
 
-                performAppropriateTask(key, serverCommandParser);
+                performAppropriateTask(key, serverCommandParser, serverCommandResponder);
             }
         }
     }
 
-    private void performAppropriateTask(SelectionKey key, ServerCommandParser serverCommandParser){
+    private void performAppropriateTask(SelectionKey key, ServerCommandParser serverCommandParser,
+                                        ServerCommandResponder serverCommandResponder){
         // Accept connection key
         if (key.isAcceptable()) {
             serverEventsHandler.acceptClientConnection(serverChannel);
@@ -68,12 +69,7 @@ public class Server {
 
             if (command == null) return;
 
-            RedisCommands redisCommand = RedisCommands.valueOf(command.getCommand());
-            String payload = command.getPayload();
-
-            command = null;
-
-            performCommandAction(redisCommand, payload, key);
+            performCommandAction(command, serverCommandResponder, key);
         }
         // Write key
 //        else if (key.isWritable()) {
@@ -81,17 +77,13 @@ public class Server {
 //        }
     }
 
-    private void performCommandAction(RedisCommands command, String payload, SelectionKey key) {
-        switch (command) {
-            case ECHO:
-                serverEventsHandler.writeToClient(payload, key);
-                break;
-            case PING:
-                serverEventsHandler.writeToClient(RedisResponses.PONG_RESPONSE, key);
-                break;
-            default:
-                System.out.println("No commands matched");
-        }
+    private void performCommandAction(Command command, ServerCommandResponder serverCommandResponder,
+                                      SelectionKey key) {
+        String response = serverCommandResponder.respondToCommand(command);
+
+        if (response == null) return;
+
+        serverEventsHandler.writeToClient(response, key);
     }
 }
 
