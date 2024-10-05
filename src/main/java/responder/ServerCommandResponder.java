@@ -2,6 +2,8 @@ package responder;
 
 import enums.RedisCommands;
 import parser.Command;
+import responder.store.GetResponder;
+import responder.store.SetResponder;
 
 public class ServerCommandResponder {
 
@@ -23,6 +25,7 @@ public class ServerCommandResponder {
 
         String response = responder.respondToCommand(command);
 
+        responder = null;
         command = null;
 
         return response;
@@ -41,6 +44,8 @@ public class ServerCommandResponder {
         return switch (redisCommand) {
             case ECHO -> new EchoResponder();
             case PING -> new PingResponder();
+            case SET -> new SetResponder();
+            case GET -> new GetResponder();
             default -> null;
         };
     }
