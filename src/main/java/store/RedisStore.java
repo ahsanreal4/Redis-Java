@@ -29,4 +29,8 @@ public class RedisStore {
 
         return redisHashMap.get(key);
     }
+
+    public static void setExpiryTime(String key, int expiryTime) {
+        redisHashMap.setExpiryTime(key, expiryTime);
+    }
 }
