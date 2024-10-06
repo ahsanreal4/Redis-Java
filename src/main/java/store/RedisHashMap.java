@@ -40,4 +40,10 @@ class RedisHashMap {
         long calculatedExpiryTime = new Date().getTime() + expiryTime;
         expiryMap.put(key, calculatedExpiryTime);
     }
+
+    public void printAllKeyValuePairs() {
+        this.hashMap.forEach((key, value) -> {
+            System.out.println("{ key: " + key + ", value: " + value + " }");
+        });
+    }
 }

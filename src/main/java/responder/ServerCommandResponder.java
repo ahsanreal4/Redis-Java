@@ -46,6 +46,7 @@ public class ServerCommandResponder {
             case PING -> new PingResponder();
             case SET -> new SetResponder();
             case GET -> new GetResponder();
+            case CONFIG -> new ConfigResponder();
             default -> null;
         };
     }

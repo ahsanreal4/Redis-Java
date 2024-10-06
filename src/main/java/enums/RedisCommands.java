@@ -1,5 +1,5 @@
 package enums;
 
 public enum RedisCommands {
-    PING, ECHO, SET, GET;
+    PING, ECHO, SET, GET, CONFIG;
 }

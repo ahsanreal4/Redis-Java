@@ -71,10 +71,6 @@ public class Server {
 
             performCommandAction(command, serverCommandResponder, key);
         }
-        // Write key
-//        else if (key.isWritable()) {
-//            serverEventsHandler.writeToClient("+PONG\r\n", key);
-//        }
     }
 
     private void performCommandAction(Command command, ServerCommandResponder serverCommandResponder,

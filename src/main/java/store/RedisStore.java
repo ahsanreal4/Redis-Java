@@ -33,4 +33,8 @@ public class RedisStore {
     public static void setExpiryTime(String key, int expiryTime) {
         redisHashMap.setExpiryTime(key, expiryTime);
     }
+
+    public static void printAllKeyValuePairs() {
+        redisHashMap.printAllKeyValuePairs();
+    }
 }
